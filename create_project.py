@@ -3,6 +3,7 @@ import subprocess
 import argparse
 from os import getenv
 from bson import ObjectId
+import time
 
 # subprocess 모듈
 def run_subprocess(command):
@@ -69,6 +70,7 @@ print(f"Installing Helm chart for project '{project_name}'...")
 run_subprocess(["sudo", "helm", "install", project_name, template_file, "--values", values_file, "--namespace", project_name])
 print(f"Helm chart for project '{project_name}' installed successfully.")
 
+time.sleep(2)
 # 5. 로드밸랜서 DNS 이름 추출 및 DB 업데이트
 print(f"Retrieving load balancer DNS name for project '{project_name}'...")
 external_ip = run_subprocess(["sudo", "kubectl", "get", "service", "-n", project_name, "-o", "jsonpath={.items[*].status.loadBalancer.ingress[*].hostname}"]).strip("'")
