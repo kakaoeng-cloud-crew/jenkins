@@ -1,21 +1,8 @@
-import boto3
 import db_utils as db  # db 접근을 위한 모듈
 import subprocess
 import argparse
 from os import getenv
 from bson import ObjectId
-
-# S3에서 파일 다운로드
-def download_from_s3(url, local_path):
-    try:
-        s3 = boto3.client('s3')
-        bucket_name = url.split('/')[2]
-        key = '/'.join(url.split('/')[3:])
-        s3.download_file(bucket_name, key, local_path)
-        print(f"Downloaded {url} to {local_path}")
-    except Exception as e:
-        print(f"Error downloading {url}: {e}")
-        exit(1)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--project_name', type=str, required=True)
@@ -44,7 +31,7 @@ except subprocess.CalledProcessError as e:
 
 # 2. 헬름 템플릿 불러와서 가져오기
 client = db.connect_to_db()
-collection = db.get_collection(client, os.getenv("DB_NAME"), os.getenv("COL_NAME"))
+collection = db.get_collection(client, getenv("DB_NAME"), getenv("COL_NAME"))
 
 # MongoDB에서 ObjectId로 조회
 try:
@@ -67,9 +54,36 @@ if not template_url or not values_url:
 template_file = f"/tmp/{project_name}_template.tgz"
 values_file = f"/tmp/{project_name}_values.yaml"
 
-# s3 서비스로 부터 저장된 데이터 다운
-download_from_s3(template_url, template_file)
-download_from_s3(values_url, values_file)
+# templates.tgz 파일 다운로드
+try:
+    result = subprocess.run(
+        ["aws", "s3", "cp", template_url, template_file]
+        check=True,
+        text=True,
+        capture_output=True
+    )
+    print(f"Helm template file download successfully.")
+    print("Output:", result.stdout)
+except subprocess.CalledProcessError as e:
+    # 명령어 실행 중 에러가 발생한 경우
+    print(f"Failed to download Helm template file.")
+    print("Error:", e.stderr)
+    exit(1)
+# values.yaml 다운로드
+try:
+    result = subprocess.run(
+        ["aws", "s3", "cp", values_url, values_file]
+        check=True,
+        text=True,
+        capture_output=True
+    )
+    print(f"Helm values file download successfully.")
+    print("Output:", result.stdout)
+except subprocess.CalledProcessError as e:
+    # 명령어 실행 중 에러가 발생한 경우
+    print(f"Failed to download Helm values file.")
+    print("Error:", e.stderr)
+    exit(1)
 
 # 4. 헬름 설치 명령어 실행
 try:
