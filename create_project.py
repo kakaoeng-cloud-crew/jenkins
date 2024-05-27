@@ -57,7 +57,7 @@ values_file = f"/tmp/{project_name}_values.yaml"
 # templates.tgz 파일 다운로드
 try:
     result = subprocess.run(
-        ["aws", "s3", "cp", template_url, template_file]
+        ["aws", "s3", "cp", template_url, template_file],
         check=True,
         text=True,
         capture_output=True
@@ -72,7 +72,7 @@ except subprocess.CalledProcessError as e:
 # values.yaml 다운로드
 try:
     result = subprocess.run(
-        ["aws", "s3", "cp", values_url, values_file]
+        ["aws", "s3", "cp", values_url, values_file],
         check=True,
         text=True,
         capture_output=True
