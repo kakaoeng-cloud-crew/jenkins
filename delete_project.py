@@ -2,7 +2,7 @@
 # import db_utils as db  # db 접근을 위한 모듈
 import subprocess
 import argparse
-# from getenv import os
+# from os import getenv
 # from bson import ObjectId
 
 parser = argparse.ArgumentParser()

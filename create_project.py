@@ -2,7 +2,7 @@ import boto3
 import db_utils as db  # db 접근을 위한 모듈
 import subprocess
 import argparse
-from getenv import os
+from os import getenv
 from bson import ObjectId
 
 # S3에서 파일 다운로드
