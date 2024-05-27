@@ -94,7 +94,7 @@ except subprocess.CalledProcessError as e:
 # 4. 헬름 설치 명령어 실행
 try:
     result = subprocess.run(
-        ["sudo", "helm", "install", project_name, template_file, "--values", values_file],
+        ["sudo", "helm", "install", project_name, template_file, "--values", values_file, "--namespace", project_name],
         check=True,
         text=True,
         capture_output=True
