@@ -51,12 +51,14 @@ try:
     result = collection.delete_one({"_id": ObjectId(project_id)})
     if result.deleted_count:
         # 프로젝트가 성공적으로 삭제된 경우
-        return {"message": "Project successfully deleted"}
+        print("Project successfully deleted from database")
     else:
         # 프로젝트가 없는 경우 404 에러 반환
-        raise HTTPException(status_code=404, detail="Project not found")
+        print("Project not found in database")
+        exit(1)
 except Exception as e:
-    raise HTTPException(status_code=500, detail=str(e))
+    print(f"Error while updating database: {e}")
+    exit(1)
 
 # 4. /helm/{project_id} 디렉토리 삭제하기
 try:
