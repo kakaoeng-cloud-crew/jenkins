@@ -71,7 +71,7 @@ print(f"Helm chart for project '{project_name}' installed successfully.")
 
 # 5. 로드밸랜서 DNS 이름 추출 및 DB 업데이트
 print(f"Retrieving load balancer DNS name for project '{project_name}'...")
-external_ip = run_subprocess(["kubectl", "get", "service", "-n", project_name, "-o", "jsonpath={.items[*].status.loadBalancer.ingress[*].hostname}"]).strip("'")
+external_ip = run_subprocess(["sudo", "kubectl", "get", "service", "-n", project_name, "-o", "jsonpath={.items[*].status.loadBalancer.ingress[*].hostname}"]).strip("'")
 print(f"External IP: {external_ip}")
 
 # 몽고 DB에 업데이트하기
