@@ -49,10 +49,16 @@ values_url = project_data.get('values_url')
 if not template_url or not values_url:
     print("Template URL or Values URL is missing in the project data.")
     exit(1)
+    
+print(template_url)
+print(values_url)
 
 # 저장 경로 설정
-template_file = f"/tmp/{project_name}_template.tgz"
-values_file = f"/tmp/{project_name}_values.yaml"
+template_file = f"/helm/{project_id}/{project_name}_template.tgz"
+values_file = f"/helm/{project_id}/{project_name}_values.yaml"
+
+print(template_file)
+print(values_file)
 
 # templates.tgz 파일 다운로드
 try:
