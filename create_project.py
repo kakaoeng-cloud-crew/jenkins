@@ -89,3 +89,60 @@ try:
 except Exception as e:
     print(f"Error while updating project data: {e}")
     exit(1)
+
+# 6. 메타 데이터 추출해서 저장하기
+data = {
+    "helm_name": "",
+    "last_deployed": "",
+    "namespace": "",
+    "status": "",
+    "revision": 0,
+    "chart": "",
+    "app_version": ""
+}
+
+first = run_subprocess(["sudo", "helm", "status", project_name, "-n", project_name])
+for line in first.splitlines():
+    if line.startswith("NAME:"):
+        data["helm_name"] = line.split(":", 1)[1].strip()
+    elif line.startswith("LAST DEPLOYED:"):
+        data["last_deployed"] = line.split(":", 1)[1].strip()
+    elif line.startswith("NAMESPACE:"):
+        data["namespace"] = line.split(":", 1)[1].strip()
+    elif line.startswith("STATUS:"):
+        data["status"] = line.split(":", 1)[1].strip()
+    elif line.startswith("REVISION:"):
+        data["revision"] = int(line.split(":", 1)[1].strip())
+
+# 첫 번째 명령어 실행
+first = subprocess.Popen(
+    ["sudo", "helm", "list", "-n", project_name], 
+    stdout=subprocess.PIPE, 
+    text=True
+)
+
+# 두 번째 명령어 실행
+second = subprocess.run(
+    ["gawk", 'NR==2 {print $9 " " $10}'], 
+    stdin=first.stdout, 
+    stdout=subprocess.PIPE, 
+    text=True,
+    check=True
+)
+first.stdout.close()
+second = second.stdout.strip()
+data["chart"], data["app_version"] = second.split(' ', 1)
+
+# 몽고 DB에 업데이트하기
+try:
+    result = collection.update_one(
+        {"_id": ObjectId(project_id)},
+        {"$set": {"meta_data": external_ip}}
+    )
+    if result.matched_count > 0:
+        print(f"Project '{project_id}' updated successfully with endpoint '{external_ip}'.")
+    else:
+        print(f"No project found with id '{project_id}' to update.")
+except Exception as e:
+    print(f"Error while updating project data: {e}")
+    exit(1)
