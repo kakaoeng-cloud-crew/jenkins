@@ -20,6 +20,8 @@ parser.add_argument('--project_id', type=str, required=True)
 args = parser.parse_args()
 project_name = args.project_name
 project_id = args.project_id
+client = db.connect_to_db()
+collection = db.get_collection(client, getenv("DB_NAME"), getenv("COL_NAME"))
 
 # MongoDB에서 ObjectId로 조회
 try:

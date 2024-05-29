@@ -63,6 +63,7 @@ except Exception as e:
     
 # 4. s3 서비스에 있는 데이터 삭제하기
 s3 = boto3.client('s3')
+bucket_name = 'cc-helm-templates'
 objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=f"projects/{project_id}/")["Contents"]
 for obj in objects:
     key = obj["Key"]
