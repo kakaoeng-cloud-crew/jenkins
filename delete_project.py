@@ -3,6 +3,7 @@ import subprocess
 import argparse
 from os import getenv
 from bson import ObjectId
+import boto3
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--project_name', type=str, required=True)
@@ -59,8 +60,18 @@ try:
 except Exception as e:
     print(f"Error while updating database: {e}")
     exit(1)
+    
+# 4. s3 서비스에 있는 데이터 삭제하기
+s3 = boto3.client('s3')
+objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=f"projects/{project_id}/")["Contents"]
+for obj in objects:
+    key = obj["Key"]
+    s3.delete_object(Bucket=bucket_name, Key=key)
 
-# 4. /helm/{project_id} 디렉토리 삭제하기
+s3.delete_object(Bucket=bucket_name, Key=f"projects/{project_id}/")
+print(f"Folder '{project_id}' successfully deleted from S3")
+
+# 5. /helm/{project_id} 디렉토리 삭제하기
 try:
     path = f"/helm/{project_id}"
     result = subprocess.run(
