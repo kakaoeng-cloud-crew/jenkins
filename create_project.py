@@ -70,10 +70,19 @@ print(f"Installing Helm chart for project '{project_name}'...")
 run_subprocess(["sudo", "helm", "install", project_name, template_file, "--values", values_file, "--namespace", project_name])
 print(f"Helm chart for project '{project_name}' installed successfully.")
 
-time.sleep(2)
-# 5. 로드밸랜서 DNS 이름 추출 및 DB 업데이트
+# 5. 로드밸런서 DNS 이름 추출 및 DB 업데이트
 print(f"Retrieving load balancer DNS name for project '{project_name}'...")
-external_ip = run_subprocess(["sudo", "kubectl", "get", "service", "-n", project_name, "-o", "jsonpath={.items[*].status.loadBalancer.ingress[*].hostname}"]).strip("'")
+external_ip = ""
+
+while not external_ip:
+    external_ip = run_subprocess([
+        "sudo", "kubectl", "get", "service", "-n", project_name, 
+        "-o", "jsonpath={.items[*].status.loadBalancer.ingress[*].hostname}"
+    ]).strip("'")
+    
+    if not external_ip:
+        print("External IP not found, retrying in 1 seconds...")
+        time.sleep(1)  # 1초 대기 후 다시 시도
 print(f"External IP: {external_ip}")
 
 # 몽고 DB에 업데이트하기
